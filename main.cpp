@@ -90,7 +90,7 @@ int main()
      int i=0;
      while(inFile.good()){inFile>>pro[i].processID>>pro[i].arrivalT>>pro[i].CPUburstT>>pro[i].ppriority;i++;}
      inFile.close();
-     cout<<pro.arrivalT;
+     cout<<pro;
      ///User's interface
      char menuChoice;
      menuChoice = menu();
@@ -102,6 +102,8 @@ int main()
     {
         if(menuChoice=='1'){
             ///First In First Out, mainly depends on the arrival time
+
+
         }
         else if(menuChoice=='2'){
             ///Shortest Job First with preemption, mainly depends on CPU burst time
