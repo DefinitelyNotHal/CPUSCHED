@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "datagen.cpp"
 using namespace std;
 
 ///Process Structure
@@ -85,7 +84,7 @@ float avgResponseT(int rt1st[], process pro[])
 ///print statistics of the run to the screen
 void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, float avgTurnaT, float avgRespT)
 {
-    cout<<"Statistics for the Run\n\n"<<endl;
+    cout<<"Statistics for the Run\n"<<endl;
     cout<<"Number of processes: 10,000"<<endl;
     cout<<"Total elapsed time(for the scheduler): "<<elapT<<endl;
     cout<<"Throughput: "<<thput<<endl;
@@ -93,6 +92,7 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
     cout<<"Average waiting time: "<<avgWaitT<<endl;
     cout<<"Average turnaround time: "<<avgTurnaT<<endl;
     cout<<"Average response time: "<<avgRespT<<endl;
+    cout<<endl;
 }
 
 int main()
