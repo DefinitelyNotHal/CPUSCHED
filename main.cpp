@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "datagen.cpp"
 using namespace std;
 
 ///Process Structure
@@ -30,7 +31,7 @@ char menu()
 };
 
 ///find waiting time
-float avgWaitingT(int ft[], int art[], int bt[])
+float avgWaitingT(int ft[], process pro[])
 {
     int wt[10000];
     float avgwait=0.0;
@@ -38,7 +39,7 @@ float avgWaitingT(int ft[], int art[], int bt[])
     int sumwait=0;
     for (int i=0;i<10000;i++)
     {
-        wt[i]=ft[i]-art[i]-bt[i];
+        wt[i]=ft[i]-pro[i].arrivalT-pro[i].CPUburstT;
         sumwait=sumwait+wt[i];
     }
     ///avg. WaitingT=sum of all waitingT/total # of processes
@@ -47,7 +48,7 @@ float avgWaitingT(int ft[], int art[], int bt[])
 }
 
 ///find turnaround time
-float avgTurnaroundT(int ft[],int art[])
+float avgTurnaroundT(int ft[],process pro[])
 {
     int tat[10000];
     float avgtat=0.0;
@@ -55,7 +56,7 @@ float avgTurnaroundT(int ft[],int art[])
     int sumtat=0;
     for (int i=0;i<10000;i++)
     {
-        tat[i]=ft[i]-art[i];
+        tat[i]=ft[i]-pro[i].arrivalT;
         sumtat=sumtat+tat[i];
     }
 
@@ -65,7 +66,7 @@ float avgTurnaroundT(int ft[],int art[])
 }
 
 ///find response time
-float avgResponseT(int rt1st[], int art[])
+float avgResponseT(int rt1st[], process pro[])
 {
     int rt[10000];
     float avgrest=0.0;
@@ -73,7 +74,7 @@ float avgResponseT(int rt1st[], int art[])
     int sumrest=0;
     for (int i=0;i<10000;i++)
     {
-        rt[i]=rt1st[i]-art[i];
+        rt[i]=rt1st[i]-pro[i].arrivalT;
         sumrest=sumrest+rt[i];
     }
     ///avg. ResponseT=sum of all responseT/total # of processes
@@ -103,8 +104,7 @@ int main()
         {  cout << "\n\n\t  INPUT FILE ERROR  \n\n";    }
      string header;
      getline(inFile,header);
-     process pro;
-     pro[10000];
+     process pro[10000];
      int i=0;
      while(inFile.good()){inFile>>pro[i].processID>>pro[i].arrivalT>>pro[i].CPUburstT>>pro[i].ppriority;i++;}
      inFile.close();
@@ -166,11 +166,11 @@ int main()
             }
             CPUutilize=(finishT[9999]-sumIdleT)/finishT[9999];
             ///calculate avg. waiting time
-            avgWaitingTime=avgWaitingT(finishT,pro.arrivalT,pro.CPUburstT);
+            avgWaitingTime=avgWaitingT(finishT,pro);
             ///calculate avg. turnaround time
-            avgTurnaroundTime=avgTurnaroundT(finishT,pro.arrivalT);
+            avgTurnaroundTime=avgTurnaroundT(finishT,pro);
             ///calculate avg. response time
-            avgResponseTime=avgResponseT(actualArrivalT, pro.arrivalT);
+            avgResponseTime=avgResponseT(actualArrivalT, pro);
             ///print to screen
             printStatistics(elapsedT,throuPut,CPUutilize,avgWaitingTime,avgTurnaroundTime,avgResponseTime);
         }

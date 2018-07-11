@@ -71,7 +71,7 @@ void parameters(int   ave_interarrival_time, //between process arrivals
 } // function parameters
 
 
-int main()
+int genInput()
 
 {
   int   hist[10];
