@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "datagen.cpp"
 using namespace std;
 
 ///Process Structure
@@ -17,12 +18,13 @@ struct process
 char menu()
 {
     char choice;
-    cout <<"menu";
+    cout <<"===============menu====================";
     cout <<"\n1. FIFO";
     cout <<"\n2. SJF with preemption";
     cout <<"\n3. RR(with specified time quantum)";
     cout <<"\n4. Priority with preemption";
     cout <<"\n5. Exit\n";
+    cout <<"=======================================\n";
 
     cin >> choice;
     return choice;
@@ -42,7 +44,7 @@ float avgWaitingT(int ft[], process pro[])
         sumwait=sumwait+wt[i];
     }
     ///avg. WaitingT=sum of all waitingT/total # of processes
-    avgwait=sumwait/10000;
+    avgwait=sumwait/10000.0;
     return avgwait;
 }
 
@@ -58,9 +60,8 @@ float avgTurnaroundT(int ft[],process pro[])
         tat[i]=ft[i]-pro[i].arrivalT;
         sumtat=sumtat+tat[i];
     }
-
     ///avg. TurnaroundT=sum of all turnaroundT/ total # of processes
-    avgtat=sumtat/10000;
+    avgtat=sumtat/10000.0;
     return avgtat;
 }
 
@@ -77,7 +78,7 @@ float avgResponseT(int rt1st[], process pro[])
         sumrest=sumrest+rt[i];
     }
     ///avg. ResponseT=sum of all responseT/total # of processes
-    avgrest=sumrest/10000;
+    avgrest=sumrest/10000.0;
     return avgrest;
 }
 
@@ -88,7 +89,7 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
     cout<<"Number of processes: 10,000"<<endl;
     cout<<"Total elapsed time(for the scheduler): "<<elapT<<endl;
     cout<<"Throughput: "<<thput<<endl;
-    cout<<"CPU utilization: "<<CPUutil<<endl;
+    cout<<"CPU utilization: "<<CPUutil<<"%"<<endl;
     cout<<"Average waiting time: "<<avgWaitT<<endl;
     cout<<"Average turnaround time: "<<avgTurnaT<<endl;
     cout<<"Average response time: "<<avgRespT<<endl;
@@ -97,6 +98,8 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
 
 int main()
 {
+     ///generates the input file and prints the processes to the screen
+     genInput();
      ///access to the file and retrieve the data
      ifstream inFile;
      inFile.open("processesInput.txt");
@@ -132,6 +135,7 @@ int main()
             ///Calculate the finish time
             int finishT[10000];
             int actualArrivalT[10000];//use for finding the response time
+            idleT.clear();
             idleT.push_back(pro[0].arrivalT);
             finishT[0]=pro[0].arrivalT+pro[0].CPUburstT;
             actualArrivalT[0]=pro[0].arrivalT;
@@ -149,14 +153,14 @@ int main()
                 {
                     ///finishT=the actual arrival time in CPU exec. + CPU burst time
                     finishT[i]=finishT[i-1]+pro[i].CPUburstT;
-                    actualArrivalT[i]=finishT[i];
+                    actualArrivalT[i]=finishT[i-1];
                 }
             }
             ///total elapsed time(for the scheduler)=final completion time
             elapsedT=finishT[9999];
             ///calculate throughput
             ///Throughput= # of process/(final completion time-time at which first process is brought to CPU)
-            throuPut=10000/(finishT[9999]-pro[0].arrivalT);
+            throuPut=10000.0/(finishT[9999]-pro[0].arrivalT);
             ///calculate CPU utilization
             ///CPU utilization=(final completion time-the sum of CPU idle time)/final completion time
             int sumIdleT=0;
@@ -164,7 +168,7 @@ int main()
             {
                 sumIdleT=sumIdleT+idleT[i];
             }
-            CPUutilize=(finishT[9999]-sumIdleT)/finishT[9999];
+            CPUutilize=float(finishT[9999]-sumIdleT)/finishT[9999]*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro);
             ///calculate avg. turnaround time
@@ -176,6 +180,11 @@ int main()
         }
         else if(menuChoice=='2'){
             ///Shortest Job First with preemption, mainly depends on CPU burst time
+            int finishT[10000];
+            int actualArrivalT[10000];
+            int remainingT[10000];
+            idleT.clear();
+            idleT.push_back(pro[0].arrivalT);
 
         }
         else if(menuChoice=='3'){
@@ -183,9 +192,19 @@ int main()
             int numQuantum=0;
             cout<<"Please enter time quantum: "<<endl;
             cin>>numQuantum;
+            int finishT[10000];
+            int actualArrivalT[10000];
+            idleT.clear();
+            idleT.push_back(pro[0].arrivalT);
+
         }
         else if(menuChoice=='4'){
             ///Priority with preemption, mainly depends on priority, smaller number means higher priority
+            int finishT[10000];
+            int actualArrivalT[10000];
+            idleT.clear();
+            idleT.push_back(pro[0].arrivalT);
+
         }
         else if(menuChoice=='5'){
             cout<<"Program is terminated."<<endl;

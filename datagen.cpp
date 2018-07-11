@@ -71,7 +71,7 @@ void parameters(int   ave_interarrival_time, //between process arrivals
 } // function parameters
 
 
-int genInput()
+void genInput()
 
 {
   int   hist[10];
@@ -111,5 +111,4 @@ outFile << "Index " << "Arrival time  "<< "CPU Burst Length " << "  Priority" <<
     }
 
 outFile.close();
-return 0;
   } // function main
