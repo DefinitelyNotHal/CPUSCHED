@@ -156,18 +156,20 @@ int main()
                     actualArrivalT[i]=finishT[i-1];
                 }
             }
-            ///total elapsed time(for the scheduler)=final completion time
-            elapsedT=finishT[9999];
+
             ///calculate throughput
             ///Throughput= # of process/(final completion time-time at which first process is brought to CPU)
             throuPut=10000.0/(finishT[9999]-pro[0].arrivalT);
-            ///calculate CPU utilization
-            ///CPU utilization=(final completion time-the sum of CPU idle time)/final completion time
+            ///calculate sum of CPU idle time
             int sumIdleT=0;
             for(unsigned int i=0;i<idleT.size();i++)
             {
                 sumIdleT=sumIdleT+idleT[i];
             }
+            ///total elapsed time(for the scheduler)=final completion time- total CPU idle time
+            elapsedT=finishT[9999]-sumIdleT;
+            ///calculate CPU utilization
+            ///CPU utilization=(final completion time-the sum of CPU idle time)/final completion time
             CPUutilize=float(finishT[9999]-sumIdleT)/finishT[9999]*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro);
