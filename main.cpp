@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include<algorithm>
 #include "datagen.cpp"
 using namespace std;
 
@@ -96,6 +97,13 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
     cout<<endl;
 }
 
+///used for sorting the process by its CPU burst time
+bool checkbt(process a,process b)
+{
+	return a.CPUburstT<b.CPUburstT;
+
+}
+
 int main()
 {
      ///generates the input file and prints the processes to the screen
@@ -120,6 +128,10 @@ int main()
      float avgTurnaroundTime=0.0;
      float avgResponseTime=0.0;
      vector <int> idleT;
+     vector <int> tempProcessID;
+     vector <int> tempArrivalT;
+     vector <int> tempCPUburstT;
+     vector <int> tempPriority;
 
      ///User's interface
      char menuChoice;
@@ -186,8 +198,44 @@ int main()
             int actualArrivalT[10000];
             int remainingT[10000];
             idleT.clear();
-            idleT.push_back(pro[0].arrivalT);
+            tempArrivalT.clear();
+            tempCPUburstT.clear();
+            tempPriority.clear();
+            tempProcessID.clear();
+            int countN=0;
+            for(int i=1;i<10000;i++)//select the first arrival time process for the calculation of CPU utilization and Throughput
+            {
+                if ((pro[i].arrivalT==pro[0].arrivalT) && (pro[i].CPUburstT<pro[0].CPUburstT))//checking if there is any process has the same arrival time as the first arrival, if so, get the SJF.
+                {
+                    tempProcessID.push_back(pro[i].processID);//stores the processID to tempProcessID
 
+                }
+                else
+                {
+                    countN++;
+                    if (countN==1)
+                    {
+                        idleT.push_back(pro[0].arrivalT);
+                        actualArrivalT[0]=pro[0].arrivalT;
+                    }
+
+                }
+            }
+            ///sort(pro, pro+10000, checkbt);
+            int CPUrunT=0;
+            int numProDone=0;
+            while(numProDone<100)//checking if all the processes have done, if not, increment by 1.
+            {
+                for(unsigned int i=0;i<10000;i++)
+                {
+                    if (pro[i].arrivalT<=CPUrunT)
+                    {
+                        idleT.push_back(pro[i].CPUburstT);
+                    }
+                }
+                numProDone++;
+                CPUrunT++;//anything before this count from 0, anything else below this count from 1
+            }
         }
         else if(menuChoice=='3'){
             ///Round Robin(with specific time quantum), mainly depends on the time quantum

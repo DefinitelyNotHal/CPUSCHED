@@ -6,10 +6,11 @@
 	<iostream>
 	<fstream>
 
-1531332865 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
+1531512694 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
 	<iostream>
 	<fstream>
 	<vector>
+	<algorithm>
 	"datagen.cpp"
 
 1531329275 c:\users\hal\desktop\cs471\cs471project\cpusched\datagen.cpp
