@@ -6,14 +6,15 @@
 	<iostream>
 	<fstream>
 
-1531790335 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
+1531865811 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
 	<iostream>
 	<fstream>
 	<vector>
+	<list>
 	<algorithm>
 	"datagen.cpp"
 
-1531329275 c:\users\hal\desktop\cs471\cs471project\cpusched\datagen.cpp
+1531859758 c:\users\hal\desktop\cs471\cs471project\cpusched\datagen.cpp
 	<stdio.h>
 	<iomanip>
 	<math.h>

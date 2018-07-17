@@ -98,14 +98,14 @@ void genInput()
 
 // Assuming that there are 10000 processes
 outFile.open("processesInput.txt");
-cout << "Index " << "Arrival time  "<< "CPU Burst Length " << "  Priority" << endl;
+//cout << "Index " << "Arrival time  "<< "CPU Burst Length " << "  Priority" << endl;
 outFile << "Index " << "Arrival time  "<< "CPU Burst Length " << "  Priority" << endl;
     for ( i=1; i<=10000; i++ )
 	{
       parameters(ave_interarr_time, last_arrival_time, max_CPU_burst, min_CPU_burst, &this_priority, &this_arrival_time, &this_CPU_burst_length);
-      cout << setw( 4 ) << i << setw(12)  << this_arrival_time << setw( 20) << this_CPU_burst_length;
+      //cout << setw( 4 ) << i << setw(12)  << this_arrival_time << setw( 20) << this_CPU_burst_length;
       outFile << setw( 4 ) << i << setw(12)  << this_arrival_time << setw( 20) << this_CPU_burst_length;
-      cout << setw(6) << this_priority << endl;
+      //cout << setw(6) << this_priority << endl;
       outFile << setw(6) << this_priority << endl;
       last_arrival_time = this_arrival_time;
     }
