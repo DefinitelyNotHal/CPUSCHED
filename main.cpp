@@ -133,10 +133,10 @@ int main()
      float avgTurnaroundTime=0.0;
      float avgResponseTime=0.0;
      vector <int> idleT;//this is only used for FIFO
-     //deque <process> tempProReadyQ;
+     deque <process> tempProReadyQ;
      deque <int> tempMin;
-     list <process> tempProReadyQ;
-     list <process>::iterator it;
+     //list <process> tempProReadyQ;
+     //list <process>::iterator it;
 
      ///User's interface
      char menuChoice;
@@ -217,127 +217,50 @@ int main()
             }
             while(numProDone<n)//checking if all the processes have done, if not, increment by 1.
             {
+                int minCPUburstT=INT_MAX;
+                int minProcessID=INT_MAX;
                 ///Ready Queue Processes
                 for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
                 {
                     if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0))
                     {
-                        tempProReadyQ.push_back(tempPro[i]);//creating a copy of ready queue processes, list
-                        /*
-                        tempProReadyQ.push_back(process());//creating a copy of ready queue processes, vector
-                        tempProReadyQ[countV].processID=tempPro[i].processID;
-                        tempProReadyQ[countV].arrivalT=tempPro[i].arrivalT;
-                        tempProReadyQ[countV].CPUburstT=tempPro[i].CPUburstT;
-                        tempProReadyQ[countV].ppriority=tempPro[i].ppriority;
-                        countV++;*/
+                        countV++; //used to check if there is any process in the ready queue, if countN=0, then it means CPU idle.
+                        if(tempPro[i].CPUburstT<minCPUburstT)
+                        {
+                            minCPUburstT=tempPro[i].CPUburstT;//find the smallest CPU burst time
+                            minProcessID=tempPro[i].processID;//find the smallest processID with the shortest CPU burst time
+                        }
+                        else if(tempPro[i].CPUburstT==minCPUburstT)//check if there is more than two process that has the same shortest CPUburstT
+                        {
+                            if (tempPro[i].processID<minProcessID)//find the smallest processID with the shortest CPU burst time
+                            {
+                                minProcessID=tempPro[i].processID;//check if there is more than two processes
+                            }
+                        }
                     }
                 }
-                countV=0;
-                if(tempProReadyQ.empty())//if ready queue is empty and no process is brought in, then it means the CPU is idle
+                if (countV==0)
                 {
                     CPUidleT++;
-                    CPUrunT++;//anything before this count from 0, anything else below this count from 1
+                    CPUrunT++;
                 }
-                else if (!tempProReadyQ.empty())//else ready queue has processes
+                else
                 {
-                    if (tempProReadyQ.size()==1)//if there is only one process in the ready queue
+                    tempPro[minProcessID-1].CPUburstT--;
+                    countN[minProcessID-1]++;
+                    if(countN[minProcessID-1]==1)
                     {
-                        tempPro[(tempProReadyQ.front().processID)-1].CPUburstT--;//list
-                        countN[(tempProReadyQ.front().processID)-1]++;
-                        if(countN[(tempProReadyQ.front().processID)-1]==1)
-                        {
-                          actualArrivalT[(tempProReadyQ.front().processID)-1]=CPUrunT;//only needs the 1st actual arrival time for each process
-                        }
-                        if(tempPro[(tempProReadyQ.front().processID)-1].CPUburstT==0)
-                        {
-                            finishT[(tempProReadyQ.front().processID)-1]=CPUrunT+1;
-                            numProDone++;
-                        }
-
-                        /*tempPro[tempProReadyQ[0].processID-1].CPUburstT--;
-                        countN[tempProReadyQ[0].processID-1]++;
-                        if(countN[tempProReadyQ[0].processID-1]==1)
-                        {
-                          actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;//only needs the 1st actual arrival time for each process
-                        }
-                        if(tempPro[tempProReadyQ[0].processID-1].CPUburstT==0)
-                        {
-                            finishT[tempProReadyQ[0].processID-1]=CPUrunT+1;
-                            numProDone++;
-                        }*/
-                        CPUrunT++;
+                        actualArrivalT[minProcessID-1]=CPUrunT;//only needs the 1st actual arrival time for each process
                     }
-                    else//there are more than one process in the ready queue
+                    if(tempPro[minProcessID-1].CPUburstT==0)
                     {
-                    sort(tempProReadyQ.begin(),tempProReadyQ.end(),checkbtvector);//sort the process based on their CPU burst time, smallest CPUburst time is the first element
-                    for(list <process>::iterator it1=tempProReadyQ.begin();it1!=tempProReadyQ.end();++it1)//to collect the processes ID that has the same shortest CPUburstT
-                    {
-                        if(it->CPUburstT==tempProReadyQ.front().CPUburstT)//check if there are more than one process that has the same shortest CPUburstT
-                        {
-                            tempMin.push_back(it->processID);//it stores process IDs
-                        }
+                        finishT[minProcessID-1]=CPUrunT+1;
+                        numProDone++;
                     }
-                        /*for(unsigned int i=0;i<tempProReadyQ.size();i++)//to collect the processes ID that has the same shortest CPUburstT
-                        {
-                        if(tempProReadyQ[i].CPUburstT==tempProReadyQ[0].CPUburstT)//check if there are more than one process that has the same shortest CPUburstT
-                        {
-                            tempMin.push_back(tempProReadyQ[i].processID);//it stores process IDs
-                        }
-                        }*/
-
-                    if(!tempMin.empty())//there are processes with the same CPUburstT
-                    {
-                        sort(tempMin.begin(),tempMin.end(),findMin);//find the smallest process ID
-                        tempPro[tempMin[0]-1].CPUburstT--;
-                        countN[tempMin[0]-1]++;
-                        if(countN[tempMin[0]-1]==1)
-                        {
-                           actualArrivalT[tempMin[0]-1]=CPUrunT;//only needs the 1st actual arrival time for each process
-                        }
-                        if(tempPro[tempMin[0]-1].CPUburstT==0)
-                        {
-                           finishT[tempMin[0]-1]=CPUrunT+1;
-                           numProDone++;
-                        }
-                        CPUrunT++;
-                    }
-                    else if(tempMin.empty())//no processes with the same CPUburstT
-                    {
-                        tempPro[(tempProReadyQ.front().processID)-1].CPUburstT--;//list
-                        countN[(tempProReadyQ.front().processID)-1]++;
-                        if(countN[(tempProReadyQ.front().processID)-1]==1)
-                        {
-                          actualArrivalT[(tempProReadyQ.front().processID)-1]=CPUrunT;//only needs the 1st actual arrival time for each process
-                        }
-                        if(tempPro[(tempProReadyQ.front().processID)-1].CPUburstT==0)
-                        {
-                            finishT[(tempProReadyQ.front().processID)-1]=CPUrunT+1;
-                            numProDone++;
-                        }
-                        /*
-                        tempPro[tempProReadyQ[0].processID-1].CPUburstT--;
-                        countN[tempProReadyQ[0].processID-1]++;
-                        if(countN[tempProReadyQ[0].processID-1]==1)
-                        {
-                          actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;//only needs the 1st actual arrival time for each process
-                        }
-                        if(tempPro[tempProReadyQ[0].processID-1].CPUburstT==0)
-                        {
-                            finishT[tempProReadyQ[0].processID-1]=CPUrunT+1;
-                            numProDone++;
-                        }*/
-                        CPUrunT++;
-                    }
-                    tempMin.clear();
-                    }
+                CPUrunT++;
                 }
-                tempProReadyQ.clear();//used it when it vector
-                //while(!tempProReadyQ.empty())
-                //{
-                //    tempProReadyQ.pop_back();
-                //}
-                //tempProReadyQ.shrink_to_fit();
             }
+
             ///total elapsed time(for the scheduler)=final completion time- total CPU idle time
             elapsedT=finishT[n-1]-CPUidleT;
             ///calculate throughput
