@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <list>
+#include <deque>
 #include <algorithm>
 #include "datagen.cpp"
 using namespace std;
@@ -131,9 +132,8 @@ int main()
      float avgTurnaroundTime=0.0;
      float avgResponseTime=0.0;
      vector <int> idleT;//this is only used for FIFO
-     vector <process> tempProReadyQ;
-     //list <process> tempProReadyQ;
-     vector<int>tempMin;
+     deque <process> tempProReadyQ;
+     deque <int> tempMin;
 
 
      ///User's interface
@@ -196,14 +196,16 @@ int main()
         }
         else if(menuChoice=='2'){
             ///Shortest Job First with preemption, mainly depends on CPU burst time
+            ///variables
             int finishT[n];
             int actualArrivalT[n];
             int CPUrunT=0;
             int CPUidleT=0;
             int numProDone=0;
             int countV=0;
-            int countN[n];//used for counting the actual arrival time, to calculate the response time of each process
-            for(unsigned int i=0;i<n;i++)//make a copy of process pro, array
+            int countN[n]={0};//used for counting the actual arrival time, to calculate the response time of each process
+            ///make a copy of process pro, array
+            for(unsigned int i=0;i<n;i++)
             {
                 tempPro[i].processID=pro[i].processID;
                 tempPro[i].arrivalT=pro[i].arrivalT;
@@ -215,7 +217,7 @@ int main()
                 ///Ready Queue Processes
                 for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
                 {
-                    if ((pro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0))
+                    if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0))
                     {
                         tempProReadyQ.push_back(process());//creating a copy of ready queue processes, vector
                         tempProReadyQ[countV].processID=tempPro[i].processID;
@@ -223,8 +225,6 @@ int main()
                         tempProReadyQ[countV].CPUburstT=tempPro[i].CPUburstT;
                         tempProReadyQ[countV].ppriority=tempPro[i].ppriority;
                         countV++;
-                        //cout<<tempProReadyQ[countV-1].arrivalT<<"||";
-                        //cout<<tempProReadyQ[countV-1].CPUburstT<<endl;
                     }
                 }
                 countV=0;
@@ -235,7 +235,6 @@ int main()
                 }
                 else if (!tempProReadyQ.empty())//else ready queue has processes
                 {
-                    //tempProReadyQ.sort(checkbtvector);//sort the process based on their CPU burst time, smallest CPUburst time is the first element
                     if (tempProReadyQ.size()==1)//if there is only one process in the ready queue
                     {
                         tempPro[tempProReadyQ[0].processID-1].CPUburstT--;
@@ -295,7 +294,11 @@ int main()
                     tempMin.clear();
                     }
                 }
-                tempProReadyQ.clear();
+                tempProReadyQ.clear();//used it when it vector
+                //while(!tempProReadyQ.empty())
+                //{
+                //    tempProReadyQ.pop_back();
+                //}
                 tempProReadyQ.shrink_to_fit();
             }
             ///total elapsed time(for the scheduler)=final completion time- total CPU idle time
@@ -311,7 +314,7 @@ int main()
             ///calculate avg. turnaround time
             avgTurnaroundTime=avgTurnaroundT(finishT,pro,n);
             ///calculate avg. response time
-            avgResponseTime=avgResponseT(actualArrivalT, pro,n);
+            avgResponseTime=avgResponseT(actualArrivalT,pro,n);
             ///print to screen
             printStatistics(elapsedT,throuPut,CPUutilize,avgWaitingTime,avgTurnaroundTime,avgResponseTime,n);
         }
