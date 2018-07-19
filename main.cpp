@@ -118,7 +118,7 @@ int main()
         {  cout << "\n\n\t  INPUT FILE ERROR  \n\n";    }
      string header;
      getline(inFile,header);
-     const int n=7;//number of processes
+     const int n=6;//number of processes
      process pro[n];
      process tempPro[n];//a copy of pro
      int i=0;
@@ -280,13 +280,112 @@ int main()
         }
         else if(menuChoice=='3'){
             ///Round Robin(with specific time quantum), mainly depends on the time quantum
+            ///foreground: time quantum; background, first come first serve.
             int numQuantum=0;
             cout<<"Please enter time quantum: "<<endl;
             cin>>numQuantum;
-            int finishT[10000];
-            int actualArrivalT[10000];
-            idleT.clear();
-            idleT.push_back(pro[0].arrivalT);
+            ///variables
+            int finishT[n]={0};
+            int actualArrivalT[n]={0};
+            int CPUrunT=0;
+            int CPUidleT=0;
+            int numProDone=0;
+            int countN[n]={0};//used for counting the actual arrival time, to calculate the response time of each process
+            int countA[n]={0};
+            int tempID=0;
+            ///make a copy of process pro, array
+            for(unsigned int i=0;i<n;i++)
+            {
+                tempPro[i].processID=pro[i].processID;
+                tempPro[i].arrivalT=pro[i].arrivalT;
+                tempPro[i].CPUburstT=pro[i].CPUburstT;
+                tempPro[i].ppriority=pro[i].ppriority;
+            }
+            while(numProDone<n)//checking if all the processes have done, if yes, increment by 1.
+            {
+                ///Ready Queue Processes
+                for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
+                {
+                    if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0)&&(countN[i]==0))//also to check existed process in the vector, this only pushes new process
+                    {
+                        tempProReadyQ.push_back(tempPro[i]);//creating a copy of ready queue processes, vector
+                        countN[i]++;
+                    }
+                }
+                if(tempProReadyQ.empty())//if ready queue is empty and no process is brought in, then it means the CPU is idle
+                {
+                    CPUidleT++;
+                    CPUrunT++;//anything before this count from 0, anything else below this count from 1
+                }
+                else//else ready queue has processes
+                {
+                    if(tempPro[tempProReadyQ[0].processID-1].CPUburstT>numQuantum)
+                    {
+                        countA[tempProReadyQ[0].processID-1]++;
+                        if(countA[tempProReadyQ[0].processID-1]==1)
+                        {
+                            actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        }
+                        tempPro[tempProReadyQ[0].processID-1].CPUburstT=tempPro[tempProReadyQ[0].processID-1].CPUburstT-numQuantum;
+                        CPUrunT=CPUrunT+numQuantum;
+                        tempID=tempProReadyQ[0].processID;
+                        tempProReadyQ.pop_front();
+                        for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
+                        {
+                            if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0)&&(countN[i]==0))//also to check existed process in the vector, this only pushes new process
+                            {
+                                tempProReadyQ.push_back(tempPro[i]);//UPDATE a copy of ready queue processes, vector
+                                countN[i]++;
+                            }
+                        }
+                        //countN[tempProReadyQ[0].processID-1]--;
+                        tempProReadyQ.push_back(tempPro[tempID-1]);
+                    }
+                    else if(tempPro[tempProReadyQ[0].processID-1].CPUburstT==numQuantum)
+                    {
+                        countA[tempProReadyQ[0].processID-1]++;
+                        if(countA[tempProReadyQ[0].processID-1]==1)
+                        {
+                            actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        }
+                        tempPro[tempProReadyQ[0].processID-1].CPUburstT=0;
+                        numProDone++;
+                        CPUrunT=CPUrunT+numQuantum;
+                        finishT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        tempProReadyQ.pop_front();
+                    }
+                    else//else the process time is smaller than the numQuantum
+                    {
+                        countA[tempProReadyQ[0].processID-1]++;
+                        if(countA[tempProReadyQ[0].processID-1]==1)
+                        {
+                            actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        }
+                        CPUrunT=CPUrunT+tempPro[tempProReadyQ[0].processID-1].CPUburstT;
+                        tempPro[tempProReadyQ[0].processID-1].CPUburstT=0;
+                        numProDone++;
+                        finishT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        tempProReadyQ.pop_front();
+                    }
+                }
+            }
+
+            ///total elapsed time(for the scheduler)=final completion time
+            elapsedT=CPUrunT;
+            ///calculate throughput
+            ///Throughput= # of process/(final completion time-the total CPU idle time)
+            throuPut=float(n)/(CPUrunT-CPUidleT);
+            ///calculate CPU utilization
+            ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
+            CPUutilize=float(elapsedT)/CPUrunT*100;
+            ///calculate avg. waiting time
+            avgWaitingTime=avgWaitingT(finishT,pro,n);
+            ///calculate avg. turnaround time
+            avgTurnaroundTime=avgTurnaroundT(finishT,pro,n);
+            ///calculate avg. response time
+            avgResponseTime=avgResponseT(actualArrivalT,pro,n);
+            ///print to screen
+            printStatistics(elapsedT,throuPut,CPUutilize,avgWaitingTime,avgTurnaroundTime,avgResponseTime,n);
 
         }
         else if(menuChoice=='4'){
