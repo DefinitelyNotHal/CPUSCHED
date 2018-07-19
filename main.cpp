@@ -5,7 +5,7 @@
 #include <iterator>
 #include <deque>
 #include <algorithm>
-#include "datagen.cpp"
+//#include "datagen.cpp"
 using namespace std;
 
 ///Process Structure
@@ -103,22 +103,22 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
 ///used for sorting the process by its CPU burst time
 bool checkbtvector(const process &a, const process &b)
 {
-    return a.CPUburstT<b.CPUburstT;
+    return a.CPUburstT>b.CPUburstT;
 }
 bool findMin(int i, int j){return (i<j);}
 
 int main()
 {
      ///generates the input file and prints the processes to the screen
-     genInput();
+     //genInput();
      ///access to the file and retrieve the data
      ifstream inFile;
-     inFile.open("processesInput.txt");
+     inFile.open("processesInput2.txt");
      if (!inFile)
         {  cout << "\n\n\t  INPUT FILE ERROR  \n\n";    }
      string header;
      getline(inFile,header);
-     const int n=10000;//number of processes
+     const int n=6;//number of processes
      process pro[n];
      process tempPro[n];//a copy of pro
      int i=0;
@@ -179,11 +179,11 @@ int main()
             {
                 sumIdleT=sumIdleT+idleT[i];
             }
-            ///total elapsed time(for the scheduler)=final completion time- total CPU idle time
-            elapsedT=finishT[n-1]-sumIdleT;
+            ///total elapsed time(for the scheduler)=final completion time
+            elapsedT=finishT[n-1];
             ///calculate throughput
-            ///Throughput= # of process/(final completion time-time at which first process is brought to CPU)
-            throuPut=float(n)/(finishT[n-1]-pro[0].arrivalT);
+            ///Throughput= # of process/(final completion time-total CPU idle time)
+            throuPut=float(n)/(finishT[n-1]-sumIdleT);
             ///calculate CPU utilization
             ///CPU utilization=(final completion time-the sum of CPU idle time)/final completion time
             CPUutilize=float(finishT[n-1]-sumIdleT)/finishT[n-1]*100;
@@ -199,12 +199,11 @@ int main()
         else if(menuChoice=='2'){
             ///Shortest Job First with preemption, mainly depends on CPU burst time
             ///variables
-            int finishT[n];
+            int finishT[n]={0};
             int actualArrivalT[n];
             int CPUrunT=0;
             int CPUidleT=0;
             int numProDone=0;
-            int countV=0;
             int countN[n]={0};//used for counting the actual arrival time, to calculate the response time of each process
 
             ///make a copy of process pro, array
@@ -219,6 +218,7 @@ int main()
             {
                 int minCPUburstT=INT_MAX;
                 int minProcessID=INT_MAX;
+                int countV=0;
                 ///Ready Queue Processes
                 for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
                 {
@@ -239,36 +239,36 @@ int main()
                         }
                     }
                 }
-                if (countV==0)
+                if (countV==0)//there is no process in the ready queue, CPU idle
                 {
                     CPUidleT++;
                     CPUrunT++;
                 }
-                else
+                else//process in the ready queue
                 {
                     tempPro[minProcessID-1].CPUburstT--;
                     countN[minProcessID-1]++;
-                    if(countN[minProcessID-1]==1)
+                    if(countN[minProcessID-1]==1)//if the process arrive at CPU for the first time
                     {
                         actualArrivalT[minProcessID-1]=CPUrunT;//only needs the 1st actual arrival time for each process
                     }
-                    if(tempPro[minProcessID-1].CPUburstT==0)
+                    if(tempPro[minProcessID-1].CPUburstT==0)//check if a process is complete
                     {
-                        finishT[minProcessID-1]=CPUrunT+1;
+                        finishT[minProcessID-1]=CPUrunT+1;//stores each process completed time
                         numProDone++;
                     }
-                CPUrunT++;
+                    CPUrunT++;
                 }
             }
 
-            ///total elapsed time(for the scheduler)=final completion time- total CPU idle time
-            elapsedT=finishT[n-1]-CPUidleT;
+            ///total elapsed time(for the scheduler)=final completion time
+            elapsedT=CPUrunT;
             ///calculate throughput
-            ///Throughput= # of process/(final completion time-time at which first process is brought to CPU)
-            throuPut=float(n)/elapsedT;
+            ///Throughput= # of process/(final completion time-the total CPU idle time)
+            throuPut=float(n)/(CPUrunT-CPUidleT);
             ///calculate CPU utilization
-            ///CPU utilization=(final completion time-the sum of CPU idle time)/final completion time
-            CPUutilize=float(elapsedT)/finishT[n-1]*100;
+            ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
+            CPUutilize=float(elapsedT)/CPUrunT*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro,n);
             ///calculate avg. turnaround time
