@@ -118,7 +118,7 @@ int main()
         {  cout << "\n\n\t  INPUT FILE ERROR  \n\n";    }
      string header;
      getline(inFile,header);
-     const int n=6;//number of processes
+     const int n=7;//number of processes
      process pro[n];
      process tempPro[n];//a copy of pro
      int i=0;
@@ -214,7 +214,7 @@ int main()
                 tempPro[i].CPUburstT=pro[i].CPUburstT;
                 tempPro[i].ppriority=pro[i].ppriority;
             }
-            while(numProDone<n)//checking if all the processes have done, if not, increment by 1.
+            while(numProDone<n)//checking if all the processes have done, if yes, increment by 1.
             {
                 int minCPUburstT=INT_MAX;
                 int minProcessID=INT_MAX;
@@ -224,7 +224,7 @@ int main()
                 {
                     if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0))
                     {
-                        countV++; //used to check if there is any process in the ready queue, if countN=0, then it means CPU idle.
+                        countV++; //used to check if there is any process in the ready queue, if countV=0, then it means CPU idle.
                         if(tempPro[i].CPUburstT<minCPUburstT)
                         {
                             minCPUburstT=tempPro[i].CPUburstT;//find the smallest CPU burst time
@@ -291,10 +291,85 @@ int main()
         }
         else if(menuChoice=='4'){
             ///Priority with preemption, mainly depends on priority, smaller number means higher priority
-            int finishT[10000];
-            int actualArrivalT[10000];
-            idleT.clear();
-            idleT.push_back(pro[0].arrivalT);
+            ///variables
+            int finishT[n]={0};
+            int actualArrivalT[n]={0};
+            int CPUrunT=0;
+            int CPUidleT=0;
+            int numProDone=0;
+            int countN[n]={0};//used for counting the actual arrival time, to calculate the response time of each process
+
+            ///make a copy of process pro, array
+            for(unsigned int i=0;i<n;i++)
+            {
+                tempPro[i].processID=pro[i].processID;
+                tempPro[i].arrivalT=pro[i].arrivalT;
+                tempPro[i].CPUburstT=pro[i].CPUburstT;
+                tempPro[i].ppriority=pro[i].ppriority;
+            }
+            while(numProDone<n)//checking if all the processes have done, if yes, increment by 1.
+            {
+                int minPriority=INT_MAX;
+                int minProcessID=INT_MAX;
+                int countV=0;
+                ///Ready Queue Processes
+                for(unsigned int i=0;i<n;i++)//get all the possible processes in ready queue, not include any process that has the CPUburstT of 0 or the remainingT of 0
+                {
+                    if ((tempPro[i].arrivalT<=CPUrunT)&&(tempPro[i].CPUburstT>0))
+                    {
+                        countV++; //used to check if there is any process in the ready queue, if countV=0, then it means CPU idle.
+                        if(tempPro[i].ppriority<minPriority)
+                        {
+                            minPriority=tempPro[i].ppriority;//find the smallest number of priority, which has the highest priority
+                            minProcessID=tempPro[i].processID;//find the smallest processID with the highest priority
+                        }
+                        else if(tempPro[i].ppriority==minPriority)//check if there is more than two process that has the same highest priority
+                        {
+                            if (tempPro[i].processID<minProcessID)//find the smallest processID with highest priority
+                            {
+                                minProcessID=tempPro[i].processID;//check if there is more than two processes
+                            }
+                        }
+                    }
+                }
+                if (countV==0)//there is no process in the ready queue, CPU idle
+                {
+                    CPUidleT++;
+                    CPUrunT++;
+                }
+                else//process in the ready queue
+                {
+                    tempPro[minProcessID-1].CPUburstT--;
+                    countN[minProcessID-1]++;
+                    if(countN[minProcessID-1]==1)//if the process arrive at CPU for the first time
+                    {
+                        actualArrivalT[minProcessID-1]=CPUrunT;//only needs the 1st actual arrival time for each process
+                    }
+                    if(tempPro[minProcessID-1].CPUburstT==0)//check if a process is complete
+                    {
+                        finishT[minProcessID-1]=CPUrunT+1;//stores each process completed time
+                        numProDone++;
+                    }
+                    CPUrunT++;
+                }
+            }
+
+            ///total elapsed time(for the scheduler)=final completion time
+            elapsedT=CPUrunT;
+            ///calculate throughput
+            ///Throughput= # of process/(final completion time-the total CPU idle time)
+            throuPut=float(n)/(CPUrunT-CPUidleT);
+            ///calculate CPU utilization
+            ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
+            CPUutilize=float(elapsedT)/CPUrunT*100;
+            ///calculate avg. waiting time
+            avgWaitingTime=avgWaitingT(finishT,pro,n);
+            ///calculate avg. turnaround time
+            avgTurnaroundTime=avgTurnaroundT(finishT,pro,n);
+            ///calculate avg. response time
+            avgResponseTime=avgResponseT(actualArrivalT,pro,n);
+            ///print to screen
+            printStatistics(elapsedT,throuPut,CPUutilize,avgWaitingTime,avgTurnaroundTime,avgResponseTime,n);
 
         }
         else if(menuChoice=='5'){
