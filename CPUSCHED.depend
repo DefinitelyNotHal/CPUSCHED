@@ -6,16 +6,30 @@
 	<iostream>
 	<fstream>
 
-1532028132 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
+1532127622 source:c:\users\hal\desktop\cs471\cs471project\cpusched\main.cpp
 	<iostream>
 	<fstream>
 	<vector>
-	<list>
-	<iterator>
 	<deque>
 	<algorithm>
+	"datagen.cpp"
 
-1531859758 c:\users\hal\desktop\cs471\cs471project\cpusched\datagen.cpp
+1532030326 c:\users\hal\desktop\cs471\cs471project\cpusched\datagen.cpp
+	<stdio.h>
+	<iomanip>
+	<math.h>
+	<iostream>
+	<fstream>
+
+1532121196 source:c:\users\jpers\games\cpusched\main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<deque>
+	<algorithm>
+	"datagen.cpp"
+
+1532030324 c:\users\jpers\games\cpusched\datagen.cpp
 	<stdio.h>
 	<iomanip>
 	<math.h>

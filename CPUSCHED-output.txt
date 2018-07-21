@@ -1,0 +1,48 @@
+FIFO
+Statistics
+
+Number of processes: 6
+Total elapsed time(for the scheduler): 63
+Throughput: 0.1
+CPU utilization: 95.2381%
+Average waiting time: 20.8333
+Average turnaround time: 30.8333
+Average response time: 20.8333
+
+---------------------------------------
+SJF with preemption
+Statistics
+
+Number of processes: 6
+Total elapsed time(for the scheduler): 63
+Throughput: 0.1
+CPU utilization: 95.2381%
+Average waiting time: 10.1667
+Average turnaround time: 20.1667
+Average response time: 3.5
+
+---------------------------------------
+Round Robin with Time Quantum: 10
+Statistics
+
+Number of processes: 6
+Total elapsed time(for the scheduler): 63
+Throughput: 0.1
+CPU utilization: 95.2381%
+Average waiting time: 21.5
+Average turnaround time: 31.5
+Average response time: 16.8333
+
+---------------------------------------
+Priority with Preemption
+Statistics
+
+Number of processes: 6
+Total elapsed time(for the scheduler): 63
+Throughput: 0.1
+CPU utilization: 95.2381%
+Average waiting time: 13.5
+Average turnaround time: 23.5
+Average response time: 3.83333
+
+---------------------------------------

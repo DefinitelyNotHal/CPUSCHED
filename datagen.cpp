@@ -90,7 +90,7 @@ void genInput()
 
   cout << "Maximum CPU Burst: ";
   cin >>   max_CPU_burst;
-  cout << "Minimum CPU Burst: ";
+  cout << "Minimum CPU Burst(this number must be greater than 0): ";
   cin >>   min_CPU_burst;
   cout << "Average Interarrival Time: ";
   cin >>   ave_interarr_time;

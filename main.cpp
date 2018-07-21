@@ -1,13 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <list>
-#include <iterator>
 #include <deque>
 #include <algorithm>
-//#include "datagen.cpp"
+#include "datagen.cpp"
 using namespace std;
 
+ofstream outFile;
 ///Process Structure
 struct process
 {
@@ -98,6 +97,17 @@ void printStatistics(int elapT, float thput, float CPUutil, float avgWaitT, floa
     cout<<"Average turnaround time: "<<avgTurnaT<<endl;
     cout<<"Average response time: "<<avgRespT<<endl;
     cout<<endl;
+
+    outFile<<"\nStatistics\n"<<endl;
+    outFile<<"Number of processes: "<<np<<endl;
+    outFile<<"Total elapsed time(for the scheduler): "<<elapT<<endl;
+    outFile<<"Throughput: "<<thput<<endl;
+    outFile<<"CPU utilization: "<<CPUutil<<"%"<<endl;
+    outFile<<"Average waiting time: "<<avgWaitT<<endl;
+    outFile<<"Average turnaround time: "<<avgTurnaT<<endl;
+    outFile<<"Average response time: "<<avgRespT<<endl;
+    outFile<<endl;
+    outFile<<"---------------------------------------" << endl;
 }
 
 ///used for sorting the process by its CPU burst time
@@ -105,20 +115,22 @@ bool checkbtvector(const process &a, const process &b)
 {
     return a.CPUburstT>b.CPUburstT;
 }
-bool findMin(int i, int j){return (i<j);}
+bool findMin(int i, int j){return (i<j);}//find the smallest number
 
 int main()
 {
      ///generates the input file and prints the processes to the screen
-     //genInput();
+     genInput();
+     ///uses CPUSCHED-output.txt as the output file
+     outFile.open("CPUSCHED-output.txt");
      ///access to the file and retrieve the data
      ifstream inFile;
-     inFile.open("processesInput2.txt");
+     inFile.open("processesInput.txt");
      if (!inFile)
         {  cout << "\n\n\t  INPUT FILE ERROR  \n\n";    }
      string header;
      getline(inFile,header);
-     const int n=6;//number of processes
+     const int n=10000;///number of processes
      process pro[n];
      process tempPro[n];//a copy of pro
      int i=0;
@@ -135,8 +147,6 @@ int main()
      vector <int> idleT;//this is only used for FIFO
      deque <process> tempProReadyQ;
      deque <int> tempMin;
-     //list <process> tempProReadyQ;
-     //list <process>::iterator it;
 
      ///User's interface
      char menuChoice;
@@ -150,6 +160,7 @@ int main()
         if(menuChoice=='1'){
             ///First In First Out, mainly depends on the arrival time
             ///Calculate the finish time
+            outFile << "FIFO";
             int finishT[n];
             int actualArrivalT[n];//use for finding the response time
             idleT.clear();
@@ -199,8 +210,9 @@ int main()
         else if(menuChoice=='2'){
             ///Shortest Job First with preemption, mainly depends on CPU burst time
             ///variables
+            outFile << "SJF with preemption";
             int finishT[n]={0};
-            int actualArrivalT[n];
+            int actualArrivalT[n]={0};
             int CPUrunT=0;
             int CPUidleT=0;
             int numProDone=0;
@@ -268,7 +280,7 @@ int main()
             throuPut=float(n)/(CPUrunT-CPUidleT);
             ///calculate CPU utilization
             ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
-            CPUutilize=float(elapsedT)/CPUrunT*100;
+            CPUutilize=float(CPUrunT-CPUidleT)/CPUrunT*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro,n);
             ///calculate avg. turnaround time
@@ -282,8 +294,9 @@ int main()
             ///Round Robin(with specific time quantum), mainly depends on the time quantum
             ///foreground: time quantum; background, first come first serve.
             int numQuantum=0;
-            cout<<"Please enter time quantum: "<<endl;
+            cout<<"Please enter time quantum: ";
             cin>>numQuantum;
+            outFile << "Round Robin with Time Quantum: " << numQuantum;
             ///variables
             int finishT[n]={0};
             int actualArrivalT[n]={0};
@@ -319,12 +332,12 @@ int main()
                 }
                 else//else ready queue has processes
                 {
-                    if(tempPro[tempProReadyQ[0].processID-1].CPUburstT>numQuantum)
+                    if(tempPro[tempProReadyQ[0].processID-1].CPUburstT>numQuantum)//if the remaining CPU burst time is greater than quantum, then it will be pop from the queue and push back to the end of the queue
                     {
-                        countA[tempProReadyQ[0].processID-1]++;
+                        countA[tempProReadyQ[0].processID-1]++;//To keep track of first actual arrival time
                         if(countA[tempProReadyQ[0].processID-1]==1)
                         {
-                            actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;
+                            actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;//stores the first actual arrival time for that process
                         }
                         tempPro[tempProReadyQ[0].processID-1].CPUburstT=tempPro[tempProReadyQ[0].processID-1].CPUburstT-numQuantum;
                         CPUrunT=CPUrunT+numQuantum;
@@ -338,23 +351,22 @@ int main()
                                 countN[i]++;
                             }
                         }
-                        //countN[tempProReadyQ[0].processID-1]--;
                         tempProReadyQ.push_back(tempPro[tempID-1]);
                     }
-                    else if(tempPro[tempProReadyQ[0].processID-1].CPUburstT==numQuantum)
+                    else if(tempPro[tempProReadyQ[0].processID-1].CPUburstT==numQuantum)//if the remaining burst time is equal to quantum, then the process will finish and pop from the the list
                     {
                         countA[tempProReadyQ[0].processID-1]++;
                         if(countA[tempProReadyQ[0].processID-1]==1)
                         {
                             actualArrivalT[tempProReadyQ[0].processID-1]=CPUrunT;
                         }
-                        tempPro[tempProReadyQ[0].processID-1].CPUburstT=0;
+                        tempPro[tempProReadyQ[0].processID-1].CPUburstT=0;//remaining burst time becomes 0
                         numProDone++;
                         CPUrunT=CPUrunT+numQuantum;
-                        finishT[tempProReadyQ[0].processID-1]=CPUrunT;
+                        finishT[tempProReadyQ[0].processID-1]=CPUrunT;//keep track of finish time of each process
                         tempProReadyQ.pop_front();
                     }
-                    else//else the process time is smaller than the numQuantum
+                    else//else the process time is smaller than the numQuantum, the process will ends before the total number of quantum
                     {
                         countA[tempProReadyQ[0].processID-1]++;
                         if(countA[tempProReadyQ[0].processID-1]==1)
@@ -377,7 +389,7 @@ int main()
             throuPut=float(n)/(CPUrunT-CPUidleT);
             ///calculate CPU utilization
             ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
-            CPUutilize=float(elapsedT)/CPUrunT*100;
+            CPUutilize=float(CPUrunT-CPUidleT)/CPUrunT*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro,n);
             ///calculate avg. turnaround time
@@ -386,11 +398,11 @@ int main()
             avgResponseTime=avgResponseT(actualArrivalT,pro,n);
             ///print to screen
             printStatistics(elapsedT,throuPut,CPUutilize,avgWaitingTime,avgTurnaroundTime,avgResponseTime,n);
-
         }
         else if(menuChoice=='4'){
             ///Priority with preemption, mainly depends on priority, smaller number means higher priority
             ///variables
+            outFile << "Priority with Preemption";
             int finishT[n]={0};
             int actualArrivalT[n]={0};
             int CPUrunT=0;
@@ -460,7 +472,7 @@ int main()
             throuPut=float(n)/(CPUrunT-CPUidleT);
             ///calculate CPU utilization
             ///CPU utilization=(final completion time-the total CPU idle time)/final completion time
-            CPUutilize=float(elapsedT)/CPUrunT*100;
+            CPUutilize=float(CPUrunT-CPUidleT)/CPUrunT*100;
             ///calculate avg. waiting time
             avgWaitingTime=avgWaitingT(finishT,pro,n);
             ///calculate avg. turnaround time
