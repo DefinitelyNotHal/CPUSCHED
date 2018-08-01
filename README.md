@@ -4,7 +4,7 @@
 # How to run this code:
 # For Windows, Way 1: In Windows CMD, change to the directory of the file using "cd", without quotes. Then input "main.exe", without quotes.
 # For example:
-# cd C:\Users\nameofUser\Desktop\CS471\CS471PROJECT\CPUSCHED
+# cd C:\Users\nameofUser\Desktop\PROJECT\CPUSCHED
 # main.exe  
 # Way 2: Double click the main.exe. (If Way 1 and 2 do not work properly, please use Way 3.)
 # Way 3: Just simply use CodeBlock to import the project, click build and run the program.
